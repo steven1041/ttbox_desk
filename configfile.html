@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>天堂1配置仪表盘 - 中文版</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&amp;family=Noto+Sans+SC:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D4AF37", // A rich gold color
+                        "background-light": "#F5F5F5",
+                        "background-dark": "#2a2a2e", // Slightly textured dark gray
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#2C2C2C",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#444444",
+                        "text-light-primary": "#212121",
+                        "text-light-secondary": "#757575",
+                        "text-dark-primary": "#FFFFFF",
+                        "text-dark-secondary": "#BDBDBD",
+                    },
+                    fontFamily: {
+                        display: ["MedievalSharp", "cursive"],
+                        sans: ["Noto Sans SC", "Roboto", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                    boxShadow: {
+                        'ornate-gold': '0 0 15px rgba(212, 175, 55, 0.3), 0 0 5px rgba(212, 175, 55, 0.5)',
+                        'inner-right': 'inset -1px 0 0px 0px rgba(68, 68, 68, 1)',
+                        'gold-glow': '0 0 8px rgba(212, 175, 55, 0.4)'
+                    }
+                },
+            },
+        };
+    </script>
+<style>body {}
+    .ornate-border {
+        border: 2px solid;
+        border-image-slice: 1;
+        border-image-source: linear-gradient(to bottom, #d4af37, #b8860b);
+        position: relative
+    }
+    .ornate-border::before, .ornate-border::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #d4af37;
+        box-shadow: 0 0 5px #d4af37
+    }
+    .ornate-border::before {
+        top: -6px;
+        left: -6px
+    }
+    .ornate-border::after {
+        top: -6px;
+        right: -6px
+    }
+    .bottom-ornate::before, .bottom-ornate::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #d4af37;
+        box-shadow: 0 0 5px #d4af37
+    }
+    .bottom-ornate::before {
+        bottom: -6px;
+        left: -6px
+    }
+    .bottom-ornate::after {
+        bottom: -6px;
+        right: -6px
+    }
+    .glassmorphism {}
+    .separator-engraved {
+        position: relative;
+    }
+    .separator-engraved::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 1px;
+        background-image: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(68,68,68,0.5) 50%, rgba(0,0,0,0.5) 100%);
+        pointer-events: none;
+    }
+    .separator-engraved::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 1px;
+        bottom: 0;
+        width: 1px;
+        background-image: linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.0) 50%, rgba(255,255,255,0.05) 100%);
+        pointer-events: none;
+    }
+    </style>
+</head>
+<body class="bg-background-dark font-sans text-text-dark-primary">
+<div class="flex min-h-screen">
+<aside class="w-1/4 min-w-[280px] flex flex-col glassmorphism separator-engraved">
+<nav class="p-6 h-full">
+<div class="mb-6">
+<h1 class="font-display text-2xl text-primary">天堂1配置</h1>
+</div>
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md text-text-dark-secondary hover:bg-primary hover:text-black transition-colors duration-200" href="#">
+<span class="material-icons">dashboard</span>
+<span class="font-semibold">仪表盘</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md bg-primary/20 text-primary border-l-4 border-primary transition-colors duration-200" href="#">
+<span class="material-icons">settings_suggest</span>
+<span class="font-semibold">自动挂机设置</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md text-text-dark-secondary hover:bg-primary hover:text-black transition-colors duration-200" href="#">
+<span class="material-icons">menu_book</span>
+<span class="font-semibold">指南与攻略</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md text-text-dark-secondary hover:bg-primary hover:text-black transition-colors duration-200" href="#">
+<span class="material-icons">gavel</span>
+<span class="font-semibold">道具拍卖</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md text-text-dark-secondary hover:bg-primary hover:text-black transition-colors duration-200" href="#">
+<span class="material-icons">forum</span>
+<span class="font-semibold">社区论坛</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md text-text-dark-secondary hover:bg-primary hover:text-black transition-colors duration-200" href="#">
+<span class="material-icons">campaign</span>
+<span class="font-semibold">游戏公告</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 rounded-md text-text-dark-secondary hover:bg-primary hover:text-black transition-colors duration-200" href="#">
+<span class="material-icons">settings</span>
+<span class="font-semibold">应用设置</span>
+</a>
+</li>
+</ul>
+</nav>
+</aside>
+<main class="flex-grow">
+<div class="p-6 space-y-8 h-full">
+<section>
+<h2 class="text-2xl font-display text-primary mb-4">配置管理</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+<div>
+<label class="block text-sm font-medium text-text-dark-secondary mb-1" for="config-file">选择配置文件</label>
+<select class="w-full bg-surface-dark/50 border-border-dark text-text-dark-primary rounded-md focus:ring-primary focus:border-primary" id="config-file" name="config-file">
+<option>打钱_亚丁.ini</option>
+<option>狩猎_首领.ini</option>
+<option>练级_龙之谷.ini</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-dark-secondary mb-1">配置文件夹</label>
+<button class="w-full flex items-center justify-start gap-3 bg-surface-dark border border-border-dark text-text-dark-primary rounded-md hover:bg-primary/20 hover:border-primary/70 focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 px-3 py-2 text-sm">
+<span class="material-icons text-base text-primary">auto_fix_high</span>
+<span>一键自动搜索</span>
+</button>
+</div>
+</div>
+</section>
+<section>
+<h3 class="text-xl font-display text-primary mb-4">一键操作</h3>
+<div class="space-y-6">
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-black/20 rounded-lg border border-border-dark">
+<div class="flex-grow">
+<label class="font-semibold text-text-dark-primary block" for="flight-id">一键无怪飞</label>
+<p class="text-sm text-text-dark-secondary">立即使用卷轴飞到安全区。</p>
+</div>
+<div class="flex items-center gap-3 mt-2 sm:mt-0 w-full flex-wrap sm:flex-nowrap sm:w-auto">
+<input class="w-full sm:w-48 bg-surface-dark border border-border-dark text-text-dark-primary rounded-md focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 placeholder:text-text-dark-secondary/70 px-3 py-2 text-sm" id="flight-id" placeholder="输入飞行ID" type="text"/>
+<select class="w-full sm:w-auto bg-surface-dark border border-border-dark text-text-dark-primary rounded-md focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 px-3 py-2 text-sm" name="afk-path">
+<option selected="">选择挂机路径</option>
+<option>路径：奇岩城镇广场</option>
+<option>路径：说话之岛码头</option>
+<option>路径：银骑士村庄</option>
+</select>
+<button class="w-full sm:w-auto flex-shrink-0 bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-yellow-500 transition-colors duration-200 shadow-ornate-gold">启用</button>
+</div>
+</div>
+<div class="p-4 bg-black/20 rounded-lg border border-border-dark">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<div class="flex-grow">
+<p class="font-semibold text-text-dark-primary">一键自动换头盔</p>
+<p class="text-sm text-text-dark-secondary">定义头盔以便根据情况快速切换。</p>
+</div>
+<button class="w-full sm:w-auto flex-shrink-0 bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-yellow-500 transition-colors duration-200 shadow-ornate-gold">启用</button>
+</div>
+<div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-sm font-medium text-text-dark-secondary mb-1" for="str-helmet">力量头盔</label>
+<input class="w-full bg-surface-dark border border-border-dark text-text-dark-primary rounded-md focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 placeholder:text-text-dark-secondary/70 px-3 py-2 text-sm" id="str-helmet" placeholder="例如：钢铁头盔" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-dark-secondary mb-1" for="agi-helmet">敏捷头盔</label>
+<input class="w-full bg-surface-dark border border-border-dark text-text-dark-primary rounded-md focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 placeholder:text-text-dark-secondary/70 px-3 py-2 text-sm" id="agi-helmet" placeholder="例如：精灵头盔" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-dark-secondary mb-1" for="afk-helmet">挂机头盔</label>
+<input class="w-full bg-surface-dark border border-border-dark text-text-dark-primary rounded-md focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 placeholder:text-text-dark-secondary/70 px-3 py-2 text-sm" id="afk-helmet" placeholder="例如：秘银头盔" type="text"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<button class="w-full flex items-center justify-center gap-2 bg-gray-600 text-text-dark-primary font-bold py-3 px-4 rounded-md hover:bg-gray-500 transition-colors duration-200">
+<span class="material-icons">lock</span> 锁定配置
+                        </button>
+<button class="w-full flex items-center justify-center gap-2 bg-gray-600 text-text-dark-primary font-bold py-3 px-4 rounded-md hover:bg-gray-500 transition-colors duration-200">
+<span class="material-icons">lock_open</span> 解锁配置
+                        </button>
+<button class="w-full flex items-center justify-center gap-2 bg-gray-600 text-text-dark-primary font-bold py-3 px-4 rounded-md hover:bg-gray-500 transition-colors duration-200 col-span-1 sm:col-span-2 lg:col-span-1">
+<span class="material-icons">auto_awesome</span> 自动施放光箭
+                        </button>
+</div>
+</div>
+</section>
+<section>
+<h3 class="text-xl font-display text-primary mb-4">使用说明</h3>
+<div class="p-6 bg-black/20 rounded-lg border border-border-dark space-y-4 text-text-dark-secondary">
+<div>
+<h4 class="font-semibold text-text-dark-primary mb-1">配置文件</h4>
+<p class="text-sm">选择一个角色配置文件和一个配置文件（.ini）以加载特定设置。当前激活的配置文件将是机器人使用的。您可以为不同的活动（如打钱、狩猎首领或练级）创建不同的 .ini 文件。</p>
+</div>
+<div>
+<h4 class="font-semibold text-text-dark-primary mb-1">一键操作</h4>
+<ul class="list-disc list-inside space-y-1 text-sm">
+<li><strong>无怪飞：</strong> 输入有效的飞行卷轴ID（例如，`scroll_of_escape_giran`）或从下拉菜单中选择一个预定义的挂机路径。点击“启用”将立即使用该物品。这对于快速逃脱或移动到安全区很有用。</li>
+<li><strong>自动换头盔：</strong> 输入您的力量、敏捷和挂机头盔在游戏中的确切名称。启用此功能后，机器人将根据战斗状态或您是否挂机自动切换头盔。</li>
+</ul>
+</div>
+<div>
+<h4 class="font-semibold text-text-dark-primary mb-1">常规控制</h4>
+<p class="text-sm">使用“锁定配置”按钮以防止在机器人运行时意外更改。点击“解锁配置”进行调整。其他按钮为您 .ini 文件中定义的常用增益或操作提供快速切换。</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>
