@@ -1,97 +1,13 @@
 import { useState } from 'react';
-import * as fs from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
+import { homeDir, documentDir, desktopDir } from '@tauri-apps/api/path';
+import { invoke } from '@tauri-apps/api/core';
+
 
 export const useFileSystem = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 读取文本文件
-  const readTextFile = async (path: string): Promise<string> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const content = await fs.readTextFile(path);
-      setLoading(false);
-      return content;
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : '未知错误');
-      throw err;
-    }
-  };
-
-  // 写入文本文件
-  const writeTextFile = async (path: string, content: string): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    try {
-      await fs.writeTextFile(path, content);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : '未知错误');
-      throw err;
-    }
-  };
-
-  // 检查文件或目录是否存在
-  const exists = async (path: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await fs.exists(path);
-      setLoading(false);
-      return result;
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : '未知错误');
-      throw err;
-    }
-  };
-
-  // 列出目录内容
-  const readDir = async (path: string): Promise<fs.FileEntry[]> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const entries = await fs.readDir(path);
-      setLoading(false);
-      return entries;
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : '未知错误');
-      throw err;
-    }
-  };
-
-  // 创建目录
-  const createDir = async (path: string, recursive: boolean = true): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    try {
-      await fs.createDir(path, { recursive });
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : '未知错误');
-      throw err;
-    }
-  };
-
-  // 删除文件或目录
-  const remove = async (path: string, recursive: boolean = false): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    try {
-      await fs.remove(path, { recursive });
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : '未知错误');
-      throw err;
-    }
-  };
 
   // 通过文件对话框选择文件
   const selectFile = async (filters?: Array<{ name: string, extensions: string[] }>): Promise<string | null> => {
@@ -154,10 +70,10 @@ export const useFileSystem = () => {
       if (depth > maxDepth) return;
 
       try {
-        const entries = await fs.readDir(path);
+        const entries = await readDirViaRust(path);
         for (const entry of entries) {
           const fullPath = `${path}/${entry.name}`;
-          if (entry.isDirectory) {
+          if (entry.is_dir) {
             await searchDir(fullPath, depth + 1);
           } else if (entry.name.endsWith('.ini')) {
             configFiles.push(fullPath);
@@ -173,18 +89,169 @@ export const useFileSystem = () => {
     return configFiles;
   };
 
+  // 搜索PSS目录 - 使用文件对话框让用户选择
+  const searchLineageConfigDir = async (): Promise<string | null> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // 直接使用文件对话框让用户选择PSS目录
+      const selectedDir = await selectDirectory();
+      if (!selectedDir) {
+        setLoading(false);
+        return null;
+      }
+      
+      // 统一路径分隔符为 /
+      const normalizedDir = selectedDir.replace(/\\/g, '/');
+      
+      // 检查用户选择的目录是否是PSS目录
+      if (normalizedDir.endsWith('PSS') || normalizedDir.includes('/PSS')) {
+        // 如果是PSS目录，返回其父目录（Lineage目录）
+        const parentDir = normalizedDir.replace(/\/PSS$/, '');
+        setLoading(false);
+        return parentDir;
+      }
+      
+      // 如果当前目录不是PSS，检查其子目录
+      try {
+        const entries = await readDirViaRust(normalizedDir);
+        for (const entry of entries) {
+          if (entry.is_dir && entry.name === 'PSS') {
+            // 找到PSS子目录，返回当前目录
+            setLoading(false);
+            return normalizedDir;
+          }
+        }
+      } catch (err) {
+        console.warn('无法读取目录内容:', err);
+      }
+      
+      setLoading(false);
+      return null;
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端读取文件（绕过前端权限限制）
+  const readTextFileViaRust = async (path: string): Promise<string> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const content = await invoke<string>('read_file_content', { filePath: path });
+      setLoading(false);
+      return content;
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端写入文件（绕过前端权限限制）
+  const writeTextFileViaRust = async (path: string, content: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      await invoke('write_file_content', { filePath: path, content });
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端检查文件是否存在（绕过前端权限限制）
+  const existsViaRust = async (path: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await invoke<boolean>('check_file_exists', { filePath: path });
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端读取目录（绕过前端权限限制）
+  const readDirViaRust = async (path: string): Promise<any[]> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const entries = await invoke<any[]>('read_directory', { dirPath: path });
+      setLoading(false);
+      return entries;
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端设置文件只读/可写状态
+  const setFileReadonly = async (path: string, readonly: boolean): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      await invoke('set_file_readonly', { filePath: path, readonly });
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端检查文件是否为只读状态
+  const isFileReadonly = async (path: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await invoke<boolean>('is_file_readonly', { filePath: path });
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
+  // 使用Rust后端写入文件（使用GBK编码）
+  const writeTextFileViaRustWithGBK = async (path: string, content: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      await invoke('write_file_content_gbk', { filePath: path, content });
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : '未知错误');
+      throw err;
+    }
+  };
+
   return {
     loading,
     error,
-    readTextFile,
-    writeTextFile,
-    exists,
-    readDir,
-    createDir,
-    remove,
     selectFile,
     selectDirectory,
     saveFile,
-    searchConfigFiles
+    searchConfigFiles,
+    searchLineageConfigDir,
+    readTextFileViaRust,
+    writeTextFileViaRust,
+    writeTextFileViaRustWithGBK,
+    existsViaRust,
+    readDirViaRust,
+    setFileReadonly,
+    isFileReadonly
   };
 };
