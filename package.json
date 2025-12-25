@@ -1,5 +1,5 @@
 {
-  "name": "说话岛助手",
+  "name": "ttbox-assistant",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -41,12 +41,12 @@
     "vite": "^7.0.4"
   },
   "keywords": [
-    "天堂1",
-    "说话岛助手",
-    "游戏配置",
-    "桌面应用"
+    "lineage1",
+    "ttbox-assistant",
+    "game-config",
+    "desktop-app"
   ],
-  "description": "天堂1游戏配置工具 - 说话岛助手",
+  "description": "Lineage1 game configuration tool - ttbox-assistant",
   "author": "Stone",
   "homepage": "https://github.com/stone/ttbox"
 }
