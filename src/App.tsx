@@ -14,7 +14,7 @@ function App() {
       try {
         // 动态导入Tauri API以确保已加载
         const tauri = await import("@tauri-apps/api");
-        console.log("Tauri API initialized successfully");
+        console.log("Tauri API initialized successfully 2");
         
         // 将Tauri API对象暴露到全局，以便其他组件可以访问
         window.__TAURI_API__ = tauri;
