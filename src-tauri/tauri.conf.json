@@ -51,7 +51,10 @@
       "windows": {
         "installMode": "passive"
       },
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY0MzFGRUIwM0E2M0VCODMKUldTRDYyTTZzUDR4OU0yWjVySmxpUVN6VVF6amp5L0FjbTlna1E5cHdqRGdacDBmUXhNRW5UMmMK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY0MzFGRUIwM0E2M0VCODMKUldTRDYyTTZzUDR4OU0yWjVySmxpUVN6VVF6amp5L0FjbTlna1E5cHdqRGdacDBmUXhNRW5UMmMK",
+      "endpoints": [
+        "https://github.com/steven1041/ttbox_desk/releases/latest/download/latest.json"
+      ]
     }
   }
 }
