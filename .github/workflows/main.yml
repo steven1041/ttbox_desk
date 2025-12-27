@@ -44,11 +44,11 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - uses: tauri-apps/tauri-action@v1
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: "${{secrets.TAURI_SIGNING_PRIVATE_KEY}}"
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: "${{secrets.TAURI_KEY_PASSWORD}}"
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_PRIVATE_KEY_PASSWORD: ""
         with:
           tagName: ttbox-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'TTBox Assistant v__VERSION__'
@@ -56,3 +56,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+          includeUpdaterJson: true
