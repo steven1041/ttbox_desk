@@ -181,16 +181,64 @@ fn encode_to_gbk(text: String) -> Result<Vec<u8>, String> {
 
 #[tauri::command]
 async fn check_for_updates(app: tauri::AppHandle) -> Result<bool, String> {
+    println!("开始检查更新...");
+    match app.updater_builder().build() {
+        Ok(updater) => {
+            println!("更新器初始化成功，开始检查远程版本...");
+            match updater.check().await {
+                Ok(update) => {
+                    if let Some(update) = update {
+                        println!("发现新版本: {} (当前版本: {})", update.version, app.package_info().version);
+                        Ok(true)
+                    } else {
+                        println!("没有可用的更新，当前版本: {} 已是最新", app.package_info().version);
+                        Ok(false)
+                    }
+                }
+                Err(e) => {
+                    println!("检查更新时发生错误: {}", e);
+                    Err(format!("检查更新失败: {}", e))
+                },
+            }
+        }
+        Err(e) => {
+            println!("更新器初始化失败: {}", e);
+            Err(format!("更新器初始化失败: {}", e))
+        },
+    }
+}
+
+#[tauri::command]
+async fn install_update(app: tauri::AppHandle) -> Result<(), String> {
     match app.updater_builder().build() {
         Ok(updater) => {
             match updater.check().await {
                 Ok(update) => {
                     if let Some(update) = update {
-                        println!("Update available: {}", update.version);
-                        Ok(true)
+                        // 下载进度回调
+                        let on_chunk = |chunk_size: usize, total_size: Option<u64>| {
+                            let percent = if let Some(total) = total_size {
+                                (chunk_size as f64 / total as f64 * 100.0) as u32
+                            } else {
+                                0
+                            };
+                            println!("下载进度: {}%", percent);
+                        };
+                        
+                        // 下载完成回调
+                        let on_download_finish = || {
+                            println!("下载完成，开始安装");
+                        };
+                        
+                        match update.download_and_install(on_chunk, on_download_finish).await {
+                            Ok(_) => {
+                                println!("更新安装成功");
+                                Ok(())
+                            }
+                            Err(e) => Err(format!("安装更新失败: {}", e)),
+                        }
                     } else {
-                        println!("No update available");
-                        Ok(false)
+                        Err("没有可用的更新".to_string())
                     }
                 }
                 Err(e) => Err(format!("检查更新失败: {}", e)),
@@ -228,7 +276,8 @@ pub fn run() {
             set_file_readonly,
             is_file_readonly,
             encode_to_gbk,
-            check_for_updates
+            check_for_updates,
+            install_update
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

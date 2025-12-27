@@ -7,6 +7,18 @@
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-save",
-    "updater:default"
+    "updater:default",
+    "core:default",
+    "shell:allow-open"
+  ],
+  "remoteDomainIpc": [
+    {
+      "domain": "github.com",
+      "plugins": ["updater"]
+    },
+    {
+      "domain": "hk.gh-proxy.org",
+      "plugins": ["updater"]
+    }
   ]
 }

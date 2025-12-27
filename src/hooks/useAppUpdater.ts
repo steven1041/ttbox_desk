@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 
 interface UpdateState {
   updateAvailable: boolean;
@@ -21,9 +22,9 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
     
     setIsCheckingUpdate(true);
     try {
-      // 使用 Tauri 的 invoke 方法调用后端命令
-      const { invoke } = window.__TAURI__.core;
-      const hasUpdate = await invoke('check_for_updates');
+      console.log("开始检查更新...");
+      // 使用 Tauri v2 的 invoke 方法调用后端命令
+      const hasUpdate = await invoke<boolean>('check_for_updates');
       
       if (hasUpdate) {
         setUpdateAvailable(true);
@@ -34,18 +35,18 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
       }
     } catch (error) {
       console.error(`检查更新失败: ${error}`);
+      setUpdateAvailable(false);
     } finally {
       setIsCheckingUpdate(false);
     }
-  }, [isCheckingUpdate]);
+  }, []); // 移除 isCheckingUpdate 依赖，防止无限循环
 
   const installUpdate = useCallback(async () => {
     if (isInstallingUpdate || !updateAvailable) return;
     
     setIsInstallingUpdate(true);
     try {
-      // 使用 Tauri 的 invoke 方法调用后端命令
-      const { invoke } = window.__TAURI__.core;
+      // 使用 Tauri v2 的 invoke 方法调用后端命令
       await invoke('install_update');
       
       console.log("更新已开始下载和安装，完成后应用将自动重启");
@@ -64,7 +65,7 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
     }, 3000);
     
     return () => clearTimeout(timer);
-  }, [checkForUpdates]);
+  }, []); // 移除 checkForUpdates 依赖，防止无限循环
 
   return {
     updateAvailable,
