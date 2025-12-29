@@ -5,6 +5,7 @@ interface UpdateNotificationProps {
   updateAvailable: boolean;
   isCheckingUpdate: boolean;
   isInstallingUpdate: boolean;
+  downloadProgress: number;
   onCheckUpdate: () => void;
   onInstallUpdate: () => void;
   onDismiss: () => void;
@@ -15,6 +16,7 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({
   updateAvailable,
   isCheckingUpdate,
   isInstallingUpdate,
+  downloadProgress,
   onCheckUpdate,
   onInstallUpdate,
   onDismiss,
@@ -36,23 +38,38 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({
           ) : updateAvailable ? (
             <div>
               <h4 className="text-sm font-semibold mb-1">发现新版本</h4>
-              <p className="text-xs opacity-90 mb-3">点击下方按钮下载并安装最新版本</p>
-              <div className="flex gap-2">
-                <button
-                  className="flex items-center gap-1 bg-white/20 hover:bg-white/30 rounded px-2 py-1 text-xs transition-colors"
-                  onClick={onInstallUpdate}
-                  disabled={isInstallingUpdate}
-                >
-                  <Download size={12} className={isInstallingUpdate ? 'animate-bounce' : ''} />
-                  {isInstallingUpdate ? '安装中...' : '立即更新'}
-                </button>
-                <button
-                  className="bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs transition-colors"
-                  onClick={onDismiss}
-                >
-                  稍后提醒
-                </button>
-              </div>
+              {isInstallingUpdate ? (
+                <div>
+                  <p className="text-xs opacity-90 mb-2">正在下载更新...</p>
+                  <div className="w-full bg-white/20 rounded-full h-2 mb-2">
+                    <div
+                      className="bg-white h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${downloadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs opacity-90">{downloadProgress}%</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs opacity-90 mb-3">点击下方按钮下载并安装最新版本</p>
+                  <div className="flex gap-2">
+                    <button
+                      className="flex items-center gap-1 bg-white/20 hover:bg-white/30 rounded px-2 py-1 text-xs transition-colors"
+                      onClick={onInstallUpdate}
+                      disabled={isInstallingUpdate}
+                    >
+                      <Download size={12} />
+                      立即更新
+                    </button>
+                    <button
+                      className="bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs transition-colors"
+                      onClick={onDismiss}
+                    >
+                      稍后提醒
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

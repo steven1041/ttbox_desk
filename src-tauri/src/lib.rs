@@ -3,10 +3,148 @@ use encoding_rs::GBK;
 use std::fs;
 use std::path::Path;
 use tauri_plugin_updater::UpdaterExt;
+use tauri::Emitter;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+// 获取 API 基础 URL
+fn get_api_base_url() -> String {
+    "http://127.0.0.1:8008".to_string()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct User {
+    email: String,
+    password: String,
+    id: Option<String>,
+    created_at: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct AuthResponse {
+    success: bool,
+    user: Option<User>,
+    message: Option<String>,
+}
+
+// 简单的内存用户存储（生产环境应使用数据库）
+static mut USERS: Option<HashMap<String, User>> = None;
+
+fn init_users() {
+    unsafe {
+        if USERS.is_none() {
+            USERS = Some(HashMap::new());
+        }
+    }
+}
+
+fn get_users() -> &'static mut HashMap<String, User> {
+    unsafe {
+        init_users();
+        USERS.as_mut().unwrap()
+    }
+}
 
 #[tauri::command]
 async fn greet(name: String) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+#[tauri::command]
+async fn login(email: String, password: String) -> Result<AuthResponse, String> {
+    println!("尝试登录: {}", email);
+    
+    // 验证邮箱格式
+    if !email.contains('@') || !email.contains('.') {
+        return Ok(AuthResponse {
+            success: false,
+            user: None,
+            message: Some("请输入有效的邮箱地址".to_string()),
+        });
+    }
+    
+    // 验证密码长度
+    if password.len() != 8 {
+        return Ok(AuthResponse {
+            success: false,
+            user: None,
+            message: Some("密码必须是8位".to_string()),
+        });
+    }
+    
+    let users = get_users();
+    
+    if let Some(user) = users.get(&email) {
+        if user.password == password {
+            println!("登录成功: {}", email);
+            Ok(AuthResponse {
+                success: true,
+                user: Some(user.clone()),
+                message: None,
+            })
+        } else {
+            Ok(AuthResponse {
+                success: false,
+                user: None,
+                message: Some("密码错误".to_string()),
+            })
+        }
+    } else {
+        Ok(AuthResponse {
+            success: false,
+            user: None,
+            message: Some("用户不存在".to_string()),
+        })
+    }
+}
+
+#[tauri::command]
+async fn register(email: String, password: String) -> Result<AuthResponse, String> {
+    println!("尝试注册: {}", email);
+    
+    // 验证邮箱格式
+    if !email.contains('@') || !email.contains('.') {
+        return Ok(AuthResponse {
+            success: false,
+            user: None,
+            message: Some("请输入有效的邮箱地址".to_string()),
+        });
+    }
+    
+    // 验证密码长度
+    if password.len() != 8 {
+        return Ok(AuthResponse {
+            success: false,
+            user: None,
+            message: Some("密码必须是8位".to_string()),
+        });
+    }
+    
+    let users = get_users();
+    
+    if users.contains_key(&email) {
+        Ok(AuthResponse {
+            success: false,
+            user: None,
+            message: Some("用户已存在".to_string()),
+        })
+    } else {
+        let new_user = User {
+            email: email.clone(),
+            password,
+            id: Some(uuid::Uuid::new_v4().to_string()),
+            created_at: Some(chrono::Utc::now().to_rfc3339()),
+        };
+        
+        users.insert(email.clone(), new_user.clone());
+        println!("注册成功: {}", email);
+        
+        Ok(AuthResponse {
+            success: true,
+            user: Some(new_user),
+            message: None,
+        })
+    }
 }
 
 #[tauri::command]
@@ -223,11 +361,16 @@ async fn install_update(app: tauri::AppHandle) -> Result<(), String> {
                                 0
                             };
                             println!("下载进度: {}%", percent);
+                            
+                            // 发送进度事件到前端
+                            let _ = app.emit_to("main", "update_progress", percent);
                         };
                         
                         // 下载完成回调
                         let on_download_finish = || {
                             println!("下载完成，开始安装");
+                            // 发送下载完成事件到前端
+                            let _ = app.emit_to("main", "update_progress", 100);
                         };
                         
                         match update.download_and_install(on_chunk, on_download_finish).await {
@@ -277,7 +420,9 @@ pub fn run() {
             is_file_readonly,
             encode_to_gbk,
             check_for_updates,
-            install_update
+            install_update,
+            login,
+            register
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 
 interface UpdateState {
   updateAvailable: boolean;
   isCheckingUpdate: boolean;
   isInstallingUpdate: boolean;
+  downloadProgress: number;
 }
 
 interface UpdateActions {
@@ -16,6 +18,7 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [isInstallingUpdate, setIsInstallingUpdate] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const checkForUpdates = useCallback(async () => {
     if (isCheckingUpdate) return;
@@ -45,8 +48,9 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
     if (isInstallingUpdate || !updateAvailable) return;
     
     setIsInstallingUpdate(true);
+    setDownloadProgress(0);
     try {
-      // 使用 Tauri v2 的 invoke 方法调用后端命令
+      // 使用 Tauri v2 的 invoke 方法调用后端命令，并监听进度事件
       await invoke('install_update');
       
       console.log("更新已开始下载和安装，完成后应用将自动重启");
@@ -54,8 +58,31 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
       console.error(`安装更新失败: ${error}`);
     } finally {
       setIsInstallingUpdate(false);
+      setDownloadProgress(0);
     }
   }, [isInstallingUpdate, updateAvailable]);
+
+  // 监听更新进度事件
+  useEffect(() => {
+    const setupProgressListener = async () => {
+      const unlisten = await listen<number>('update_progress', (event) => {
+        setDownloadProgress(event.payload);
+      });
+      return unlisten;
+    };
+
+    let unlistenPromise: Promise<() => void> | null = null;
+    
+    setupProgressListener().then(unlisten => {
+      unlistenPromise = Promise.resolve(unlisten);
+    });
+
+    return () => {
+      if (unlistenPromise) {
+        unlistenPromise.then(unlisten => unlisten());
+      }
+    };
+  }, []);
 
   // 应用启动时检查更新
   useEffect(() => {
@@ -71,6 +98,7 @@ export const useAppUpdater = (): UpdateState & UpdateActions => {
     updateAvailable,
     isCheckingUpdate,
     isInstallingUpdate,
+    downloadProgress,
     checkForUpdates,
     installUpdate
   };
