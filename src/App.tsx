@@ -4,7 +4,23 @@ import UpdateNotification from "./components/UpdateNotification";
 import AuthForm from "./components/AuthForm";
 import { useAppUpdater } from "./hooks/useAppUpdater";
 import { useAuth } from "./hooks/useAuth";
+import { User } from "./types/auth";
 import "./App.css";
+
+// 格式化日期显示
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return '未开通';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  } catch {
+    return '无效日期';
+  }
+};
 
 function App() {
   const [showUpdateNotification, setShowUpdateNotification] = useState(true);
@@ -71,9 +87,20 @@ function App() {
       <div className="relative">
         {/* 用户信息栏 */}
         <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center gap-3">
-          <span className="text-white text-sm">
-            欢迎, {user?.email}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-white text-sm">
+              欢迎, {user?.email}
+            </span>
+            {user?.is_vip ? (
+              <span className="text-xs text-yellow-300">
+                VIP会员 | 到期: {formatDate(user?.vip_end_time)}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400">
+                普通用户
+              </span>
+            )}
+          </div>
           <button
             onClick={logout}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors"
@@ -82,7 +109,7 @@ function App() {
           </button>
         </div>
         
-        <ConfigDashboard />
+        <ConfigDashboard user={user} />
         
         <UpdateNotification
           updateAvailable={updateAvailable}

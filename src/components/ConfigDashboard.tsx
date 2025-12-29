@@ -15,12 +15,17 @@ import {
   Save,
   Upload,
   Search,
+  Crown,
 } from "lucide-react";
 import { useFileSystem } from "../hooks/useFileSystem";
 import Toast from "./Toast";
+import { User } from "../types/auth";
 
+interface ConfigDashboardProps {
+  user: User | null;
+}
 
-const ConfigDashboard: React.FC = () => {
+const ConfigDashboard: React.FC<ConfigDashboardProps> = ({ user }) => {
   const [configFile, setConfigFile] = useState("");
   const [configFiles, setConfigFiles] = useState<string[]>([]);
   const [configDir, setConfigDir] = useState<string>("");
@@ -602,6 +607,12 @@ const ConfigDashboard: React.FC = () => {
 
   // 处理启用飞行
   const handleEnableFlight = async () => {
+    // VIP 权限检查
+    if (!user?.is_vip) {
+      showToast("此功能需要VIP会员才能使用", 'warning');
+      return;
+    }
+
     if (!flightId && !selectedPath) {
       showToast("请先设置飞行ID或选择挂机路径", 'warning');
       return;
@@ -791,6 +802,12 @@ const ConfigDashboard: React.FC = () => {
 
   // 处理启用自动换头盔
   const handleEnableHelmetSwap = async () => {
+    // VIP 权限检查
+    if (!user?.is_vip) {
+      showToast("此功能需要VIP会员才能使用", 'warning');
+      return;
+    }
+
     if (!afkHelmet || afkHelmet.trim() === "") {
       showToast("挂机头盔为必填项，请输入挂机头盔名称", 'warning');
       return;
@@ -984,6 +1001,12 @@ const ConfigDashboard: React.FC = () => {
 
   // 处理自动施放光箭
   const handleAutoLightArrow = async () => {
+    // VIP 权限检查
+    if (!user?.is_vip) {
+      showToast("此功能需要VIP会员才能使用", 'warning');
+      return;
+    }
+
     if (!configFile || !selectedCharacter || !configDir) {
       showToast("请先选择配置文件", 'warning');
       return;
@@ -1384,7 +1407,15 @@ const ConfigDashboard: React.FC = () => {
 
           {/* One-Click Operations Section */}
           <section>
-            <h3 className="text-xl font-display text-primary mb-4">一键操作</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-display text-primary">一键操作</h3>
+              {!user?.is_vip && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/20 border border-yellow-500/50 rounded-md">
+                  <Crown size={14} className="text-yellow-400" />
+                  <span className="text-xs text-yellow-400">VIP会员专属功能</span>
+                </div>
+              )}
+            </div>
             <div className="space-y-6">
               {/* Flight Options */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-black/20 rounded-lg border border-border-dark">
@@ -1432,9 +1463,9 @@ const ConfigDashboard: React.FC = () => {
                   <button
                     className="w-full sm:w-auto bg-surface-dark border border-border-dark text-text-dark-primary rounded-md hover:bg-primary/20 hover:border-primary/70 focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 px-3 py-2 text-sm font-medium disabled:opacity-50"
                     onClick={handleEnableFlight}
-                    disabled={isConfigLocked}
+                    disabled={isConfigLocked || !user?.is_vip}
                   >
-                    启用
+                    启用{!user?.is_vip && ' (VIP)'}
                   </button>
                 </div>
               </div>
@@ -1528,9 +1559,9 @@ const ConfigDashboard: React.FC = () => {
                 <button
                   className="w-full sm:w-auto bg-surface-dark border border-border-dark text-text-dark-primary rounded-md hover:bg-primary/20 hover:border-primary/70 focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 px-3 py-2 text-sm font-medium disabled:opacity-50"
                   onClick={handleEnableHelmetSwap}
-                  disabled={isConfigLocked}
+                  disabled={isConfigLocked || !user?.is_vip}
                 >
-                  启用自动换头盔
+                  启用自动换头盔{!user?.is_vip && ' (VIP)'}
                 </button>
                 <div className="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md">
                   <p className="text-xs text-yellow-300">
@@ -1560,10 +1591,10 @@ const ConfigDashboard: React.FC = () => {
                 <button
                   className="flex items-center gap-2 bg-surface-dark border border-border-dark text-text-dark-primary rounded-md hover:bg-primary/20 hover:border-primary/70 focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 px-3 py-2 text-sm font-medium disabled:opacity-50"
                   onClick={handleAutoLightArrow}
-                  disabled={isConfigLocked}
+                  disabled={isConfigLocked || !user?.is_vip}
                 >
                   <Zap size={16} />
-                  MP大于40%自动光箭
+                  MP大于40%自动光箭{!user?.is_vip && ' (VIP)'}
                 </button>
                 <button
                   className="flex items-center gap-2 bg-surface-dark border border-border-dark text-text-dark-primary rounded-md hover:bg-primary/20 hover:border-primary/70 focus:ring-1 focus:ring-primary focus:border-primary focus:shadow-gold-glow transition-all duration-200 px-3 py-2 text-sm font-medium"
